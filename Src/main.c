@@ -62,6 +62,10 @@ RNG_HandleTypeDef hrng;
 /* Private variables ---------------------------------------------------------*/
 // 16 * sizeof(uint32_t) = 64 bytes
 #define RAND_BUF_SIZE 16
+
+__IO uint32_t rand_number;
+__IO uint8_t wait_data;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -82,7 +86,8 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+  wait_data = 0xFF;
+  rand_number = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -117,10 +122,13 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-    uint32_t r[RAND_BUF_SIZE];
     uint8_t i;
+    uint32_t r[RAND_BUF_SIZE];
     for (i = 0; i < RAND_BUF_SIZE; i++) {
-      HAL_RNG_GenerateRandomNumber(&hrng, &(r[i]));
+      HAL_RNG_GenerateRandomNumber_IT(&hrng);
+      while (wait_data);
+      r[i] = rand_number;
+      wait_data = 1;
     }
     CDC_Transmit_FS((uint8_t*)r, RAND_BUF_SIZE * sizeof(uint32_t));
   }
@@ -334,6 +342,32 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void HAL_RNG_ReadyDataCallback(RNG_HandleTypeDef *hrng, uint32_t random32bit) {
+  if (wait_data == 0xFF) {
+    // do not use first random number, save it for comparison
+    rand_number = random32bit;
+    wait_data = 1;
+    HAL_RNG_GenerateRandomNumber_IT(hrng);
+    return;
+  }
+  if (wait_data == 1) {
+    if (rand_number != random32bit) {
+      wait_data = 0;
+      rand_number = random32bit;
+    } else {
+      wait_data = 1;
+      HAL_RNG_GenerateRandomNumber_IT(hrng);
+    }
+  }
+}
+
+void HAL_RNG_ErrorCallback(RNG_HandleTypeDef *hrng) {
+  for (;;) {
+    HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
+    HAL_Delay(500);
+  }
+}
 
 /* USER CODE END 4 */
 

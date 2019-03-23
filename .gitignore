@@ -7,3 +7,7 @@ Middlewares/ST/STM32_USB_Device_Library
 .mxproject
 mx.scratch
 rand.bin
+.cproject
+.project
+.pydevproject
+.settings/
