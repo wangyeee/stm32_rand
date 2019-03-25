@@ -8,7 +8,7 @@ This project turns [STM32F4-Discovery](https://www.st.com/en/evaluation-tools/st
 3. Firmware programming tool
 
 ## Compiling the Code
-1. Clone this project, open `stm32_rand.ioc` with STM32CubeMX. The click `Generate Code` under `Project menu` to download and copy STM32F4 drivers and USB libraries to `Drivers/CMSIS`, `Drivers/STM32F4xx_HAL_Driver` and 
+1. Clone this project, open `stm32_rand.ioc` with STM32CubeMX. The click `Generate Code` under `Project` menu to download and copy STM32F4 drivers and USB libraries to `Drivers/CMSIS`, `Drivers/STM32F4xx_HAL_Driver` and 
 `Middlewares/ST/STM32_USB_Device_Library`.
 2. Type `make` to build, or `make DEBUG=0 OPT=-O2` to build a release version.
 
