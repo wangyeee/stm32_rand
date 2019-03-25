@@ -1,4 +1,5 @@
 from serial import Serial
+from serial.tools.list_ports import comports
 from argparse import ArgumentParser
 import os, sys
 
@@ -30,16 +31,27 @@ def skipExistingFile(fileName):
         choice = choice.upper()
     return choice[0]
 
+def listSerialPorts():
+    portsInfo = sorted(comports(False))
+    cnts = 0
+    print('Searching available serial ports...')
+    for p in portsInfo:
+        print(str(p))
+        cnts += 1
+    if cnts == 0:
+        print('No ports available')
+
 if __name__ == '__main__':
     parser = ArgumentParser(description = 'Dump random data into a file.')
-    parser.add_argument('-p', required=True, help='The serial port, e.g. COM1 on Windows or /dev/ttyUSB0 on Linux.')
-    parser.add_argument('-o', required=True, help='Output file name')
+    parser.add_argument("--list", action = 'store_true', help='List available serial ports.')
+    parser.add_argument('-p', required=False, help='The serial port, e.g. COM1 on Windows or /dev/ttyUSB0 on Linux.')
+    parser.add_argument('-o', required=False, help='Output file name')
     parser.add_argument('-s', required=False, default='1M', help='File size, e.g. 64, 1K, 10M, 2G, etc.')
 
     args = parser.parse_args()
-    print(args.p)
-    print(args.o)
-    print(args.s)
+    if args.list:
+        listSerialPorts()
+        sys.exit(0)
 
     size = parseSize(args.s)
     if size < 10:
